@@ -9,6 +9,9 @@ Welcome to C2SM Containers Documentation!
 The present documentation describes how to create container images and
 use them at CSCS with very limited performance penalty.
 
+.. role:: bash(code)
+   :language: bash
+              
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
