@@ -6,7 +6,7 @@ General Patterns
 
 Install dummy slurm
 ^^^^^^^^^^^^^^^^^^^
-COSMO and INT2LM both have slurm as a runtime dependency. Since we onle use the binaries, but not any infrastructure from withing the container,
+COSMO and INT2LM both have slurm as a runtime dependency. Since we only use the binaries, but not any infrastructure from within the container,
 slurm is not used. To save build-time a dummy slurm installation is passed to spack via ``packages.yaml``
 
 .. code-block:: Docker
@@ -34,7 +34,6 @@ The content of ``/opt/spack-env`` is copied to the lightweight runtime image and
    COPY --from=builder /opt/spack-env /opt/spack-env
 
    ...
-
 
    # put spack-env into profile
    RUN echo "$(cat opt/spack-env)" >> /etc/profile
