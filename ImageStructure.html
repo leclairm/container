@@ -1,0 +1,213 @@
+
+
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Image structure &mdash; C2SM Containers 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.min.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to C2SM Containers Documentation!" href="index.html" /> 
+
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <a class="site-nav-toggle hidden-lg-up"><i class="icon-menu"></i></a>
+            <a class="site-title" href="index.html">
+                C2SM Containers
+            </a>
+        </div>
+    </header>
+
+
+<div class="breadcrumbs-outer hidden-xs-down">
+    <div class="container">
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="breadcrumbs">
+    
+      <li><a href="index.html">Docs</a></li>
+        
+      <li>Image structure</li>
+    
+    
+      <li class="breadcrumbs-aside">
+        
+            
+            <a href="_sources/ImageStructure.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+</div>
+    </div>
+</div>
+    <div class="main-outer">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-lg-3 site-nav">
+                    
+<div role="search">
+    <form class="search" action="search.html" method="get">
+        <div class="icon-input">
+            <input type="text" name="q" placeholder="Search" />
+            <span class="icon-search"></span>
+        </div>
+        <input type="submit" value="Go" class="d-hidden" />
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+                    <div class="site-nav-tree">
+                        
+                            
+                            
+                                <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Image structure</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-patterns">General Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dockerfiles">Dockerfiles</a></li>
+</ul>
+</li>
+</ul>
+
+                            
+                        
+                    </div>
+                </div>
+                <div class="col-12 col-lg-9">
+                    <div class="document">
+                        
+                            
+  <section id="image-structure">
+<h1>Image structure<a class="headerlink" href="#image-structure" title="Permalink to this heading">¶</a></h1>
+<section id="general-patterns">
+<h2>General Patterns<a class="headerlink" href="#general-patterns" title="Permalink to this heading">¶</a></h2>
+<section id="install-dummy-slurm">
+<h3>Install dummy slurm<a class="headerlink" href="#install-dummy-slurm" title="Permalink to this heading">¶</a></h3>
+<p>COSMO and INT2LM both have slurm as a runtime dependency. Since we only use the binaries, but not any infrastructure from within the container,
+slurm is not used. To save build-time a dummy slurm installation is passed to spack via <code class="docutils literal notranslate"><span class="pre">packages.yaml</span></code></p>
+<div class="highlight-Docker notranslate"><div class="highlight"><pre><span></span><span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;  slurm:&quot;</span> &gt;&gt; /root/.spack/packages.yaml <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">echo</span> <span class="s2">&quot;      buildable: false&quot;</span> &gt;&gt; /root/.spack/packages.yaml <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">echo</span> <span class="s2">&quot;      externals:&quot;</span> &gt;&gt; /root/.spack/packages.yaml <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">echo</span> <span class="s2">&quot;      - spec: slurm%gcc&quot;</span> &gt;&gt; /root/.spack/packages.yaml <span class="o">&amp;&amp;</span> <span class="se">\</span>
+    <span class="nb">echo</span> <span class="s2">&quot;        prefix: /usr&quot;</span> &gt;&gt; /root/.spack/packages.yaml
+</pre></div>
+</div>
+</section>
+<section id="load-runtime-environment-with-spack">
+<h3>Load runtime environment with Spack<a class="headerlink" href="#load-runtime-environment-with-spack" title="Permalink to this heading">¶</a></h3>
+<p>In order to load the correct environment variables at runtime, i.e. <code class="docutils literal notranslate"><span class="pre">GRIB_DEFINITION_PATH</span></code>
+the command <code class="docutils literal notranslate"><span class="pre">spack</span> <span class="pre">load</span> <span class="pre">--sh</span></code> is written to <code class="docutils literal notranslate"><span class="pre">/etc/profile</span></code>:</p>
+<div class="highlight-Docker notranslate"><div class="highlight"><pre><span></span><span class="c"># dump spack-env to file</span>
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="k">$(</span>spack load --sh <span class="nv">$COSMO_SPEC</span><span class="k">)</span> &gt; /opt/spack-env
+</pre></div>
+</div>
+<p>The content of <code class="docutils literal notranslate"><span class="pre">/opt/spack-env</span></code> is copied to the lightweight runtime image and added to <code class="docutils literal notranslate"><span class="pre">/etc/profile</span></code>:</p>
+<div class="highlight-Docker notranslate"><div class="highlight"><pre><span></span><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>builder /opt/spack-env /opt/spack-env
+
+...
+
+<span class="c"># put spack-env into profile</span>
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span> <span class="s2">&quot;</span><span class="k">$(</span>cat opt/spack-env<span class="k">)</span><span class="s2">&quot;</span> &gt;&gt; /etc/profile
+</pre></div>
+</div>
+<p>Finally the runtime enviromnment is loaded in the entrypoint of the Dockerfile:</p>
+<div class="highlight-Docker notranslate"><div class="highlight"><pre><span></span><span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/bin/bash&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--rcfile&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/etc/profile&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-l&quot;</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-c&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="dockerfiles">
+<h2>Dockerfiles<a class="headerlink" href="#dockerfiles" title="Permalink to this heading">¶</a></h2>
+<div class="graphviz"><img src="_images/graphviz-c9c9a5c71b4e2afab1dc35011378d8e39775a89f.png" alt="digraph TD {
+bgcolor=&quot;transparent&quot;
+&quot;nvidia-spack&quot; -&gt; &quot;mpich&quot;;
+&quot;mpich&quot; -&gt; &quot;cosmo:cpu&quot;;
+&quot;mpich&quot; -&gt; &quot;cosmo:gpu&quot;;
+&quot;mpich&quot; -&gt; &quot;int2lm&quot;;
+}" class="graphviz" /></div>
+</section>
+</section>
+
+
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            LANGUAGE:'en',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+    <div class="footer" role="contentinfo">
+        <div class="container">
+            &#169; Copyright 2022, C2SM team.
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.
+        </div>
+    </div>  
+
+</body>
+</html>
