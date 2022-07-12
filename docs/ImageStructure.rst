@@ -49,6 +49,7 @@ Dockerfiles
 
 .. digraph:: TD
 
+   bgcolor="transparent"
    "nvidia-spack" -> "mpich";
    "mpich" -> "cosmo:cpu";
    "mpich" -> "cosmo:gpu";
