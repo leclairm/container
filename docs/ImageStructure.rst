@@ -49,7 +49,7 @@ Dockerfiles
 
 .. digraph:: TD
 
-   nvidia-spack -> mpich;
-   mpich -> cosmo:cpu;
-   mpich -> cosmo:gpu;
-   mpich -> int2lm;
+   "nvidia-spack" -> "mpich";
+   "mpich" -> "cosmo:cpu";
+   "mpich" -> "cosmo:gpu";
+   "mpich" -> "int2lm";
