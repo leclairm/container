@@ -16,17 +16,7 @@ use them at CSCS with very limited performance penalty.
    :maxdepth: 2
    :caption: Contents:
 
-   ..
-      QuickStart
-      Install
-      C2SMGuidelines
-      SpackCommands
-      Problems
-      CodeDev
-      SpackManagement
-      CI
-      SpackChoice
-      PrTesting
+   ImageStructure
 
 Indices and tables
 ==================
